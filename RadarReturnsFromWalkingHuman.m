@@ -83,6 +83,7 @@ rtoe = segment(17).PositionData;
 rtoe = rtoe{1,1};
 
 j = sqrt(-1);
+
 % radar parameters
 lambda = 0.02; % wave length
 rangeres = 0.01; % range resolution
@@ -90,429 +91,446 @@ radarloc = [10,0,2]; % radar location
 nr = round(2*sqrt(radarloc(1)^2+radarloc(2)^2+radarloc(3)^2)/rangeres);
 np = size(base,2);
 data = zeros(nr,np);
+
 % radar returns from the head
 for k = 1:np
-% distance from radar to head
-r_dist(:,k) = abs(head(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the head
-aspct(:,k) = head(:,k)-neck(:,k);
-% calculate theta angle
-A = [radarloc(1)-head(1,k); radarloc(2)-head(2,k);...
-radarloc(3)-head(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-head(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.1; % ellipsoid parameter
-b = 0.1;
-c = headlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to head
+    r_dist(:,k) = abs(head(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the head
+    aspct(:,k) = head(:,k)-neck(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-head(1,k); radarloc(2)-head(2,k);...
+    radarloc(3)-head(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-head(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.1; % ellipsoid parameter
+    b = 0.1;
+    c = headlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from torso
 for k = 1:np
-% distance from radar to torso
-torso(:,k) = (neck(:,k)+base(:,k))/2;
-r_dist(:,k) = abs(torso(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the torso
-aspct(:,k) = neck(:,k)-base(:,k);
-% calculate theta angle
-A = [radarloc(1)-torso(1,k); radarloc(2)-torso(2,k);...
-radarloc(3)-torso(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-torso(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.15;
-b = 0.15;
-c = torsolen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to torso
+    torso(:,k) = (neck(:,k)+base(:,k))/2;
+    r_dist(:,k) = abs(torso(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the torso
+    aspct(:,k) = neck(:,k)-base(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-torso(1,k); radarloc(2)-torso(2,k);...
+    radarloc(3)-torso(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-torso(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.15;
+    b = 0.15;
+    c = torsolen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left shoulder
 for k = 1:np
-% distance from radar to left shoulder
-r_dist(:,k) = abs(lshoulder(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left shoulder
-aspct(:,k) = lshoulder(:,k)-neck(:,k);
-% calculate theta angle
-A = [radarloc(1)-lshoulder(1,k); radarloc(2)-lshoulder(2,k);...
-radarloc(3)-lshoulder(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-lshoulder(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.06;
-b = 0.06;
-c = shoulderlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left shoulder
+    r_dist(:,k) = abs(lshoulder(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left shoulder
+    aspct(:,k) = lshoulder(:,k)-neck(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-lshoulder(1,k); radarloc(2)-lshoulder(2,k);...
+    radarloc(3)-lshoulder(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-lshoulder(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.06;
+    b = 0.06;
+    c = shoulderlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right shoulder
 for k = 1:np
-% distance from radar to right shoulder
-r_dist(:,k) = abs(rshoulder(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right shoulder
-aspct(:,k) = rshoulder(:,k)-neck(:,k);
-% calculate theta angle
-A = [radarloc(1)-rshoulder(1,k); radarloc(2)-rshoulder(2,k);...
-radarloc(3)-rshoulder(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rshoulder(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.06;
-b = 0.06;
-c = shoulderlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right shoulder
+    r_dist(:,k) = abs(rshoulder(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right shoulder
+    aspct(:,k) = rshoulder(:,k)-neck(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rshoulder(1,k); radarloc(2)-rshoulder(2,k);...
+    radarloc(3)-rshoulder(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rshoulder(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.06;
+    b = 0.06;
+    c = shoulderlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left upper-arm
 for k = 1:np
-% distance from radar to left upper-arm
-lupperarm(:,k) = (lshoulder(:,k)+lelbow(:,k))/2;
-r_dist(:,k) = abs(lupperarm(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left upper-arm
-aspct(:,k) = lshoulder(:,k)-lelbow(:,k);
-% calculate theta angle
-A = [radarloc(1)-lupperarm(1,k); radarloc(2)-lupperarm(2,k);...
-radarloc(3)-lupperarm(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-lupperarm(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.06;
-b = 0.06;
-c = upperarmlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left upper-arm
+    lupperarm(:,k) = (lshoulder(:,k)+lelbow(:,k))/2;
+    r_dist(:,k) = abs(lupperarm(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left upper-arm
+    aspct(:,k) = lshoulder(:,k)-lelbow(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-lupperarm(1,k); radarloc(2)-lupperarm(2,k);...
+    radarloc(3)-lupperarm(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-lupperarm(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.06;
+    b = 0.06;
+    c = upperarmlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right upper-arm
 for k = 1:np
-% distance from radar to right upper-arm
-rupperarm(:,k) = (rshoulder(:,k)+relbow(:,k))/2;
-r_dist(:,k) = abs(rupperarm(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right upper-arm
-aspct(:,k) = rshoulder(:,k)-relbow(:,k);
-% calculate theta angle
-A = [radarloc(1)-rupperarm(1,k); radarloc(2)-rupperarm(2,k);...
-radarloc(3)-rupperarm(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rupperarm(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.06;
-b = 0.06;
-c = upperarmlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right upper-arm
+    rupperarm(:,k) = (rshoulder(:,k)+relbow(:,k))/2;
+    r_dist(:,k) = abs(rupperarm(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right upper-arm
+    aspct(:,k) = rshoulder(:,k)-relbow(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rupperarm(1,k); radarloc(2)-rupperarm(2,k);...
+    radarloc(3)-rupperarm(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rupperarm(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.06;
+    b = 0.06;
+    c = upperarmlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left lower-arm
 for k = 1:np
-% distance from radar to left lower-arm
-r_dist(:,k) = abs(lhand(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left lower-arm
-aspct(:,k) = lelbow(:,k)-lhand(:,k);
-% calculate theta angle
-A = [radarloc(1)-lhand(1,k); radarloc(2)-lhand(2,k);...
-radarloc(3)-lhand(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-lhand(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.05;
-b = 0.05;
-c = lowerarmlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left lower-arm
+    r_dist(:,k) = abs(lhand(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left lower-arm
+    aspct(:,k) = lelbow(:,k)-lhand(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-lhand(1,k); radarloc(2)-lhand(2,k);...
+    radarloc(3)-lhand(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-lhand(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.05;
+    b = 0.05;
+    c = lowerarmlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right lower-arm
 for k = 1:np
-% distance from radar to right lower-arm
-r_dist(:,k) = abs(rhand(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right lower-arm
-aspct(:,k) = relbow(:,k)-rhand(:,k);
-% calculate theta angle
-A = [radarloc(1)-rhand(1,k); radarloc(2)-rhand(2,k);...
-radarloc(3)-rhand(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rhand(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.05;
-b = 0.05;
-c = lowerarmlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right lower-arm
+    r_dist(:,k) = abs(rhand(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right lower-arm
+    aspct(:,k) = relbow(:,k)-rhand(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rhand(1,k); radarloc(2)-rhand(2,k);...
+    radarloc(3)-rhand(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rhand(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.05;
+    b = 0.05;
+    c = lowerarmlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left hip
 for k = 1:np
-% distance from radar to left hip
-r_dist(:,k) = abs(lhip(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left hip
-aspct(:,k) = lhip(:,k)-base(:,k);
-% calculate theta angle
-A = [radarloc(1)-lhip(1,k); radarloc(2)-lhip(2,k);...
-radarloc(3)-lhip(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-lhip(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.07;
-b = 0.07;
-c = hiplen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left hip
+    r_dist(:,k) = abs(lhip(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left hip
+    aspct(:,k) = lhip(:,k)-base(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-lhip(1,k); radarloc(2)-lhip(2,k);...
+    radarloc(3)-lhip(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-lhip(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.07;
+    b = 0.07;
+    c = hiplen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right hip
 for k = 1:np
-% distance from radar to right hip
-r_dist(:,k) = abs(rhip(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right hip
-aspct(:,k) = rhip(:,k)-base(:,k);
-% calculate theta angle
-A = [radarloc(1)-rhip(1,k); radarloc(2)-rhip(2,k);...
-radarloc(3)-rhip(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rhip(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.07;
-b = 0.07;
-c = hiplen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right hip
+    r_dist(:,k) = abs(rhip(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right hip
+    aspct(:,k) = rhip(:,k)-base(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rhip(1,k); radarloc(2)-rhip(2,k);...
+    radarloc(3)-rhip(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rhip(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.07;
+    b = 0.07;
+    c = hiplen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left upper-leg
 for k = 1:np
-% distance from radar to left upper-leg
-lupperleg(:,k) = (lhip(:,k)+lknee(:,k))/2;
-r_dist(:,k) = abs(lupperleg(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left upper-leg
-aspct(:,k) = lknee(:,k)-lhip(:,k);
-% calculate theta angle
-A = [radarloc(1)-lupperleg(1,k); radarloc(2)-lupperleg(2,k);...
-radarloc(3)-lupperleg(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-lupperleg(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.07;
-b = 0.07;
-c = upperleglen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left upper-leg
+    lupperleg(:,k) = (lhip(:,k)+lknee(:,k))/2;
+    r_dist(:,k) = abs(lupperleg(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left upper-leg
+    aspct(:,k) = lknee(:,k)-lhip(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-lupperleg(1,k); radarloc(2)-lupperleg(2,k);...
+    radarloc(3)-lupperleg(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-lupperleg(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.07;
+    b = 0.07;
+    c = upperleglen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right upper-leg
 for k = 1:np
-% distance from radar to right upper-leg
-rupperleg(:,k) = (rhip(:,k)+rknee(:,k))/2;
-r_dist(:,k) = abs(rupperleg(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right upper-leg
-aspct(:,k) = rknee(:,k)-rhip(:,k);
-% calculate theta angle
-A = [radarloc(1)-rupperleg(1,k); radarloc(2)-rupperleg(2,k);...
-radarloc(3)-rupperleg(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rupperleg(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.07;
-b = 0.07;
-c = upperleglen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right upper-leg
+    rupperleg(:,k) = (rhip(:,k)+rknee(:,k))/2;
+    r_dist(:,k) = abs(rupperleg(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right upper-leg
+    aspct(:,k) = rknee(:,k)-rhip(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rupperleg(1,k); radarloc(2)-rupperleg(2,k);...
+    radarloc(3)-rupperleg(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rupperleg(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.07;
+    b = 0.07;
+    c = upperleglen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left lower-leg
 for k = 1:np
-% distance from radar to left lower-leg
-llowerleg(:,k) = (lankle(:,k)+lknee(:,k))/2;
-r_dist(:,k) = abs(llowerleg(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left lower-leg
-aspct(:,k) = lankle(:,k)-lknee(:,k);
-% calculate theta angle
-A = [radarloc(1)-llowerleg(1,k); radarloc(2)-llowerleg(2,k);...
-radarloc(3)-llowerleg(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-llowerleg(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.06;
-b = 0.06;
-c = upperleglen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left lower-leg
+    llowerleg(:,k) = (lankle(:,k)+lknee(:,k))/2;
+    r_dist(:,k) = abs(llowerleg(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left lower-leg
+    aspct(:,k) = lankle(:,k)-lknee(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-llowerleg(1,k); radarloc(2)-llowerleg(2,k);...
+    radarloc(3)-llowerleg(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-llowerleg(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.06;
+    b = 0.06;
+    c = upperleglen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right lower-leg
 for k = 1:np
-% distance from radar to right lower-leg
-rlowerleg(:,k) = (rankle(:,k)+rknee(:,k))/2;
-r_dist(:,k) = abs(rlowerleg(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right lower-leg
-aspct(:,k) = rankle(:,k)-rknee(:,k);
-% calculate theta angle
-A = [radarloc(1)-rlowerleg(1,k); radarloc(2)-rlowerleg(2,k);...
-radarloc(3)-rlowerleg(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rlowerleg(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.06;
-b = 0.06;
-c = upperleglen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right lower-leg
+    rlowerleg(:,k) = (rankle(:,k)+rknee(:,k))/2;
+    r_dist(:,k) = abs(rlowerleg(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right lower-leg
+    aspct(:,k) = rankle(:,k)-rknee(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rlowerleg(1,k); radarloc(2)-rlowerleg(2,k);...
+    radarloc(3)-rlowerleg(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rlowerleg(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.06;
+    b = 0.06;
+    c = upperleglen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from left foot
 for k = 1:np
-% distance from radar to left foot
-r_dist(:,k) = abs(ltoe(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the left foot
-aspct(:,k) = lankle(:,k)-ltoe(:,k);
-% calculate theta angle
-A = [radarloc(1)-ltoe(1,k); radarloc(2)-ltoe(2,k);...
-radarloc(3)-ltoe(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-ltoe(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.05;
-b = 0.05;
-c = footlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to left foot
+    r_dist(:,k) = abs(ltoe(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the left foot
+    aspct(:,k) = lankle(:,k)-ltoe(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-ltoe(1,k); radarloc(2)-ltoe(2,k);...
+    radarloc(3)-ltoe(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-ltoe(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.05;
+    b = 0.05;
+    c = footlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % radar returns from right foot
 for k = 1:np
-% distance from radar to right foot
-r_dist(:,k) = abs(rtoe(:,k)-radarloc(:));
-distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
-% aspect vector of the right foot
-aspct(:,k) = rankle(:,k)-rtoe(:,k);
-% calculate theta angle
-A = [radarloc(1)-rtoe(1,k); radarloc(2)-rtoe(2,k);...
-radarloc(3)-rtoe(3,k)];
-B = [aspct(1,k); aspct(2,k); aspct(3,k)];
-A_dot_B = dot(A,B,1);
-A_sum_sqrt = sqrt(sum(A.*A,1));
-B_sum_sqrt = sqrt(sum(B.*B,1));
-ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
-PhiAngle(k) = asin((radarloc(2)-rtoe(2,k))./...
-sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
-a = 0.05;
-b = 0.05;
-c = footlen/2;
-rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
-amp(k) = sqrt(rcs(k));
-PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
-data(floor(distances(k)/rangeres),k) = ...
-data(floor(distances(k)/rangeres),k) + PHs;
+    % distance from radar to right foot
+    r_dist(:,k) = abs(rtoe(:,k)-radarloc(:));
+    distances(k) = sqrt(r_dist(1,k).^2+r_dist(2,k).^2+r_dist(3,k).^2);
+    % aspect vector of the right foot
+    aspct(:,k) = rankle(:,k)-rtoe(:,k);
+    % calculate theta angle
+    A = [radarloc(1)-rtoe(1,k); radarloc(2)-rtoe(2,k);...
+    radarloc(3)-rtoe(3,k)];
+    B = [aspct(1,k); aspct(2,k); aspct(3,k)];
+    A_dot_B = dot(A,B,1);
+    A_sum_sqrt = sqrt(sum(A.*A,1));
+    B_sum_sqrt = sqrt(sum(B.*B,1));
+    ThetaAngle(k) = acos(A_dot_B ./ (A_sum_sqrt .* B_sum_sqrt));
+    PhiAngle(k) = asin((radarloc(2)-rtoe(2,k))./...
+    sqrt(r_dist(1,k).^2+r_dist(2,k).^2));
+    a = 0.05;
+    b = 0.05;
+    c = footlen/2;
+    rcs(k) = rcsellipsoid(a,b,c,PhiAngle(k),ThetaAngle(k));
+    amp(k) = sqrt(rcs(k));
+    PHs = amp(k)*(exp(-j*4*pi*distances(k)/lambda));
+    data(floor(distances(k)/rangeres),k) = ...
+    data(floor(distances(k)/rangeres),k) + PHs;
 end
+
 % display range profiles
 figure
 colormap(jet(256))
@@ -525,6 +543,7 @@ clim = get(gca,'CLim');
 set(gca,'CLim',clim(2) + [-40 0]);
 colorbar
 drawnow
+
 %% micro-Doppler signature
 spec = flipud(fftshift(spectrogram(sum(data), 256, 200, 2^12), 1));
 figure
