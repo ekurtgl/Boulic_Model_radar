@@ -1,3 +1,5 @@
 # Boulic_Model_radar
 
-`GlobalHumanWalk.m` is the main script.
+`GlobalHumanWalk.m` and `FMCW_sim_boulic.m` are the main scripts.
+
+
